@@ -237,7 +237,15 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 For bugs and feature requests, please [create an issue](https://github.com/wn01011/llm-token-tracker/issues).
 
-## 📦 What's New in v2.1.0
+## 📦 What's New in v2.2.0
+
+- 🗄️ **File-based persistence** - Session data survives server restarts
+- 💾 Automatic saving to `~/.llm-token-tracker/sessions.json`
+- 🔄 Works for both npm and local installations
+- 📊 Historical data tracking across sessions
+- 🎯 Zero configuration required - just works!
+
+## What's New in v2.1.0
 
 - 🆕 Added `get_current_session` tool for intuitive session tracking
 - 📊 Real-time progress bars and visual indicators

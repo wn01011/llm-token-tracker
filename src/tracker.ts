@@ -6,19 +6,28 @@ import { TokenUsage, TrackerConfig, UserUsage } from './index.js';
 import { OpenAIWrapper } from './providers/openai.js';
 import { AnthropicWrapper } from './providers/anthropic.js';
 import { calculateCost } from './pricing.js';
+import { FileStorage } from './storage.js';
 
 export class TokenTracker {
   private config: TrackerConfig;
   private usageHistory: Map<string, TokenUsage[]> = new Map();
   private activeTracking: Map<string, any> = new Map();
   private userTotals: Map<string, UserUsage> = new Map();
+  private storage: FileStorage | null = null;
 
   constructor(config: TrackerConfig = {}) {
     this.config = {
       currency: 'USD',
       saveToDatabase: false,
+      enableFileStorage: true, // Enable by default
       ...config
     };
+
+    // Initialize file storage
+    if (this.config.enableFileStorage !== false) {
+      this.storage = new FileStorage();
+      this.loadFromStorage();
+    }
   }
 
   /**
@@ -113,6 +122,11 @@ export class TokenTracker {
     // Update user totals
     this.updateUserTotals(userId, usage);
 
+    // Save to file storage
+    if (this.storage) {
+      this.saveToStorage();
+    }
+
     // Send webhook if configured
     if (this.config.webhookUrl) {
       this.sendWebhook(usage);
@@ -204,6 +218,52 @@ export class TokenTracker {
   clearUserUsage(userId: string): void {
     this.usageHistory.delete(userId);
     this.userTotals.delete(userId);
+    
+    // Save to file storage after clearing
+    if (this.storage) {
+      this.saveToStorage();
+    }
+  }
+
+  /**
+   * Load data from file storage
+   */
+  private loadFromStorage(): void {
+    if (!this.storage) return;
+
+    const data = this.storage.load();
+    if (!data) return;
+
+    // Convert Record to Map
+    this.usageHistory = new Map(Object.entries(data.history));
+    this.userTotals = new Map(Object.entries(data.totals));
+  }
+
+  /**
+   * Save data to file storage
+   */
+  private saveToStorage(): void {
+    if (!this.storage) return;
+    this.storage.save(this.usageHistory, this.userTotals);
+  }
+
+  /**
+   * Get storage file path
+   */
+  getStoragePath(): string | null {
+    return this.storage?.getPath() || null;
+  }
+
+  /**
+   * Clear all stored data
+   */
+  clearAllStorage(): boolean {
+    if (!this.storage) return false;
+    
+    this.usageHistory.clear();
+    this.userTotals.clear();
+    
+    return this.storage.clear();
   }
 
   /**

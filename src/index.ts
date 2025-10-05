@@ -23,6 +23,7 @@ export interface TrackerConfig {
   currency?: 'USD' | 'KRW';
   webhookUrl?: string;
   saveToDatabase?: boolean;
+  enableFileStorage?: boolean; // Enable file-based persistence
   customPricing?: Record<string, any>;
 }
 
