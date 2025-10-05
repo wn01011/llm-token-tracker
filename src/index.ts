@@ -1,5 +1,5 @@
 /**
- * AI Token Tracker - Main Entry Point
+ * LLM Token Tracker - Main Entry Point
  * Track token usage and costs for OpenAI and Claude APIs
  */
 
@@ -39,11 +39,7 @@ export interface UserUsage {
 }
 
 // Main exports
-export { TokenTracker } from './tracker';
-export { OpenAIWrapper } from './providers/openai';
-export { AnthropicWrapper } from './providers/anthropic';
-export { calculateCost, PRICING } from './pricing';
-
-// Default export
-import { TokenTracker } from './tracker';
-export default TokenTracker;
+export { TokenTracker } from './tracker.js';
+export { OpenAIWrapper } from './providers/openai.js';
+export { AnthropicWrapper } from './providers/anthropic.js';
+export { calculateCost, formatCost, PRICING } from './pricing.js';

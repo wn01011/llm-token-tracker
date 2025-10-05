@@ -2,10 +2,10 @@
  * Core Token Tracker Class
  */
 
-import { TokenUsage, TrackerConfig, UserUsage } from './index';
-import { OpenAIWrapper } from './providers/openai';
-import { AnthropicWrapper } from './providers/anthropic';
-import { calculateCost } from './pricing';
+import { TokenUsage, TrackerConfig, UserUsage } from './index.js';
+import { OpenAIWrapper } from './providers/openai.js';
+import { AnthropicWrapper } from './providers/anthropic.js';
+import { calculateCost } from './pricing.js';
 
 export class TokenTracker {
   private config: TrackerConfig;

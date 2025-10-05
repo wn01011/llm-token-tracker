@@ -2,8 +2,8 @@
  * Anthropic Claude API Wrapper for token tracking
  */
 
-import { TokenTracker } from '../tracker';
-import { TokenUsage } from '../index';
+import { TokenTracker } from '../tracker.js';
+import { TokenUsage } from '../index.js';
 
 export class AnthropicWrapper {
   private client: any;
