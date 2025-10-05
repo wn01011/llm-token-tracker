@@ -1,6 +1,6 @@
 # LLM Token Tracker 🧮
 
-Token usage tracker for OpenAI and Claude APIs. Pass accurate API costs to your users.
+Token usage tracker for OpenAI and Claude APIs with **MCP (Model Context Protocol) support**. Pass accurate API costs to your users.
 
 [![npm version](https://badge.fury.io/js/llm-token-tracker.svg)](https://www.npmjs.com/package/llm-token-tracker)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -13,6 +13,7 @@ Token usage tracker for OpenAI and Claude APIs. Pass accurate API costs to your 
 - 🔄 **Multiple Providers** - OpenAI and Claude support
 - 📈 **User Management** - Track usage per user/session
 - 🌐 **Currency Support** - USD and KRW
+- 🤖 **MCP Server** - Use directly in Claude Desktop!
 
 ## 📦 Installation
 
@@ -21,6 +22,8 @@ npm install llm-token-tracker
 ```
 
 ## 🚀 Quick Start
+
+### Option 1: Use as Library
 
 ```javascript
 const { TokenTracker } = require('llm-token-tracker');
@@ -71,6 +74,26 @@ const response = await openai.chat.completions.create({
 console.log(response._tokenUsage);
 // { tokens: 125, cost: 0.0002, model: "gpt-3.5-turbo" }
 ```
+
+### Option 2: Use as MCP Server
+
+Add to Claude Desktop settings (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "token-tracker": {
+      "command": "npx",
+      "args": ["llm-token-tracker"]
+    }
+  }
+}
+```
+
+Then in Claude:
+- "Track my API usage"
+- "Compare costs between GPT-4 and Claude"
+- "Show my total spending today"
 
 ## 📊 Supported Models & Pricing
 

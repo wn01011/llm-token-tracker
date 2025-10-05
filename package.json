@@ -1,7 +1,7 @@
 {
   "name": "llm-token-tracker",
-  "version": "1.0.0",
-  "description": "Token usage tracker for OpenAI and Claude APIs. Pass accurate API costs to your users.",
+  "version": "1.1.0",
+  "description": "Token usage tracker for OpenAI and Claude APIs with MCP support. Pass accurate API costs to your users.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -9,8 +9,11 @@
     "README.md",
     "LICENSE"
   ],
+  "bin": {
+    "llm-token-tracker": "./dist/mcp-server.js"
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp src/mcp-server.js dist/mcp-server.js",
     "dev": "tsc --watch",
     "test": "jest",
     "example": "node examples/basic-usage.js",
@@ -28,6 +31,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.19.1",
     "dotenv": "^17.2.3",
     "tiktoken": "^1.0.10"
   },
