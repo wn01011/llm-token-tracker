@@ -1,0 +1,356 @@
+# AI Token Tracker - 프로젝트 학습 문서
+
+## 프로젝트 개요
+- **목적**: OpenAI와 Claude API 사용 시 토큰 사용량을 추적하고 비용을 계산하여 사용자별 과금을 가능하게 하는 라이브러리
+- **대상**: AI 서비스를 개발하는 개발자로, 사용자에게 토큰 사용량만큼 정확히 과금하고 싶은 사람들
+- **핵심 가치**: 투명한 과금, 정확한 사용량 추적, 간편한 통합
+
+## 기술 스택
+- TypeScript/JavaScript (메인 라이브러리)
+- Node.js 환경
+- MCP (Model Context Protocol) 지원 옵션
+- npm 패키지로 배포
+
+## 핵심 기능
+1. **토큰 사용량 추적**
+   - OpenAI API (GPT-3.5, GPT-4, DALL-E, Whisper)
+   - Anthropic Claude API (Claude 3 Opus, Sonnet, Haiku)
+   - 실시간 토큰 카운팅
+   - 스트리밍 응답 지원
+
+2. **비용 계산**
+   - 모델별 차등 요금 적용
+   - Input/Output 토큰 구분 계산
+   - 실시간 비용 업데이트
+   - 다양한 통화 지원 (USD, KRW)
+
+3. **사용자별 관리**
+   - 사용자 ID별 사용량 추적
+   - 세션 기반 추적
+   - 사용 내역 저장 및 조회
+   - 일별/월별 집계
+
+## API 설계 원칙
+
+### 1. 간단한 통합 (1분 설치)
+```javascript
+// 설치
+npm install ai-token-tracker
+
+// 사용
+import { TokenTracker } from 'ai-token-tracker';
+import OpenAI from 'openai';
+
+const tracker = new TokenTracker();
+const openai = tracker.wrap(new OpenAI());
+
+// 이제 openai 사용 시 자동으로 토큰 추적됨
+const response = await openai.chat.completions.create({...});
+console.log(response._tokenUsage); // { tokens: 150, cost: 0.003 }
+```
+
+### 2. 명확한 인터페이스
+```typescript
+interface TokenUsage {
+  provider: 'openai' | 'anthropic';
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  cost: {
+    amount: number;
+    currency: 'USD' | 'KRW';
+  };
+  timestamp: Date;
+  userId?: string;
+  sessionId?: string;
+}
+```
+
+### 3. 프레임워크 중립적
+- Express, Fastify, Next.js 등 모든 Node.js 프레임워크 지원
+- 프론트엔드 프레임워크 독립적
+- REST API 또는 GraphQL과 함께 사용 가능
+
+## 가격 정책 데이터
+
+### OpenAI 가격 (2024년 기준)
+```
+GPT-4 Turbo:
+- Input: $0.01 / 1K tokens
+- Output: $0.03 / 1K tokens
+
+GPT-3.5 Turbo:
+- Input: $0.0005 / 1K tokens  
+- Output: $0.0015 / 1K tokens
+
+DALL-E 3:
+- Standard: $0.040 / image
+- HD: $0.080 / image
+
+Whisper:
+- $0.006 / minute
+```
+
+### Anthropic Claude 가격
+```
+Claude 3 Opus:
+- Input: $0.015 / 1K tokens
+- Output: $0.075 / 1K tokens
+
+Claude 3 Sonnet:
+- Input: $0.003 / 1K tokens
+- Output: $0.015 / 1K tokens
+
+Claude 3 Haiku:
+- Input: $0.00025 / 1K tokens
+- Output: $0.00125 / 1K tokens
+```
+
+## 주요 클래스 및 메서드
+
+### TokenTracker 클래스
+```typescript
+class TokenTracker {
+  constructor(config?: TrackerConfig);
+  
+  // API 래핑
+  wrap(apiClient: any): any;
+  
+  // 수동 추적
+  startTracking(userId: string, sessionId?: string): string;
+  endTracking(trackingId: string, usage: TokenUsage): void;
+  
+  // 사용량 조회
+  getUsage(userId: string, timeframe?: 'today' | 'week' | 'month'): UsageSummary;
+  getUserBalance(userId: string): number;
+  
+  // 비용 계산
+  calculateCost(provider: string, model: string, tokens: number): number;
+  
+  // 웹훅
+  setWebhook(url: string): void;
+}
+```
+
+### 사용 예제 패턴
+
+#### 1. 기본 사용
+```javascript
+const tracker = new TokenTracker();
+const openai = tracker.wrap(new OpenAI({ apiKey: process.env.OPENAI_KEY }));
+
+const response = await openai.chat.completions.create({
+  model: "gpt-3.5-turbo",
+  messages: [{ role: "user", content: "Hello" }]
+});
+
+console.log(`Used ${response._tokenUsage.totalTokens} tokens`);
+console.log(`Cost: $${response._tokenUsage.cost.amount}`);
+```
+
+#### 2. 사용자별 추적
+```javascript
+const tracker = new TokenTracker();
+
+// 미들웨어로 사용
+app.use((req, res, next) => {
+  req.tracker = tracker.createUserSession(req.user.id);
+  next();
+});
+
+// 라우트에서 사용
+app.post('/api/chat', async (req, res) => {
+  const openai = req.tracker.wrap(new OpenAI());
+  const response = await openai.chat.completions.create({...});
+  
+  res.json({
+    response: response.choices[0].message.content,
+    usage: response._tokenUsage
+  });
+});
+```
+
+#### 3. 스트리밍 응답 처리
+```javascript
+const stream = await openai.chat.completions.create({
+  model: "gpt-4",
+  messages: messages,
+  stream: true
+});
+
+let totalTokens = 0;
+for await (const chunk of stream) {
+  // 스트리밍 중에도 토큰 추적
+  if (chunk._tokenUsage) {
+    totalTokens = chunk._tokenUsage.accumulated;
+  }
+}
+```
+
+## 에러 처리
+
+### 일반적인 에러 상황
+1. **API 키 없음**: 명확한 에러 메시지 제공
+2. **네트워크 에러**: 토큰 추적 실패 시에도 API 호출은 정상 작동
+3. **잘못된 모델명**: 기본 가격으로 폴백
+4. **스트리밍 중단**: 부분 토큰도 정확히 계산
+
+### 에러 처리 예제
+```javascript
+try {
+  const response = await trackedOpenAI.chat.completions.create({...});
+} catch (error) {
+  if (error.code === 'insufficient_quota') {
+    // 사용자 잔액 부족
+    console.log('Please recharge your account');
+  } else {
+    // 다른 에러는 그대로 전달
+    throw error;
+  }
+}
+```
+
+## 데이터 저장 구조
+
+### 1. 사용자 테이블
+```sql
+CREATE TABLE users (
+  id VARCHAR(255) PRIMARY KEY,
+  balance DECIMAL(10, 4) DEFAULT 0,
+  total_tokens_used BIGINT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### 2. 사용 내역 테이블
+```sql
+CREATE TABLE token_usage (
+  id VARCHAR(255) PRIMARY KEY,
+  user_id VARCHAR(255) REFERENCES users(id),
+  provider VARCHAR(50),
+  model VARCHAR(100),
+  input_tokens INT,
+  output_tokens INT,
+  total_tokens INT,
+  cost DECIMAL(10, 6),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## 성능 최적화
+
+### 1. 배치 처리
+- 여러 API 호출을 묶어서 처리
+- 토큰 계산을 비동기로 처리
+- 데이터베이스 쓰기 작업 큐잉
+
+### 2. 캐싱
+- 가격 정보 캐싱
+- 사용자 잔액 캐싱 (TTL: 60초)
+- 자주 사용되는 프롬프트 토큰 수 캐싱
+
+### 3. 경량화
+- 최소한의 의존성
+- 트리 쉐이킹 지원
+- 번들 크기 < 50KB
+
+## 보안 고려사항
+
+1. **API 키 보호**
+   - 서버 사이드에서만 실행
+   - 환경 변수 사용 권장
+   - 키 노출 방지 로직
+
+2. **사용량 제한**
+   - Rate limiting 구현
+   - 사용자별 일일 한도 설정
+   - 이상 사용 패턴 감지
+
+3. **데이터 프라이버시**
+   - 프롬프트 내용은 저장하지 않음
+   - 토큰 수와 비용만 기록
+   - GDPR 준수
+
+## 테스트 전략
+
+### 단위 테스트
+```javascript
+describe('TokenTracker', () => {
+  it('should calculate GPT-4 tokens correctly', () => {
+    const cost = tracker.calculateCost('openai', 'gpt-4', 1000);
+    expect(cost).toBe(0.03);
+  });
+  
+  it('should wrap OpenAI client properly', () => {
+    const wrapped = tracker.wrap(mockOpenAI);
+    expect(wrapped.chat.completions.create).toBeDefined();
+  });
+});
+```
+
+### 통합 테스트
+- 실제 API 호출 테스트 (테스트 환경)
+- 스트리밍 응답 테스트
+- 에러 상황 테스트
+
+## 로드맵
+
+### Phase 1 (MVP) - 2주
+- [x] OpenAI GPT 모델 지원
+- [x] Anthropic Claude 지원
+- [x] 기본 토큰 추적
+- [x] 비용 계산
+- [ ] npm 패키지 배포
+
+### Phase 2 - 1개월
+- [ ] 스트리밍 응답 완벽 지원
+- [ ] 사용자별 대시보드 UI
+- [ ] 웹훅 지원
+- [ ] 상세 로깅
+
+### Phase 3 - 2개월
+- [ ] 더 많은 프로바이더 지원
+- [ ] 프롬프트 최적화 제안
+- [ ] 이상 사용 감지
+- [ ] SaaS 버전 출시
+
+## 경쟁 제품 분석
+
+### Helicone
+- 장점: 프록시 방식, 상세 분석
+- 단점: 복잡한 설정, 비용
+
+### LangSmith
+- 장점: LangChain 통합
+- 단점: LangChain 종속적
+
+### 자체 구현
+- 장점: 완전한 제어
+- 단점: 개발 시간, 유지보수
+
+### 우리의 차별점
+- 1분 설치
+- 제로 설정
+- 투명한 가격
+- 오픈소스
+
+## FAQ
+
+Q: 스트리밍 응답도 추적 가능한가요?
+A: 네, 스트리밍 중에도 실시간으로 토큰을 카운팅합니다.
+
+Q: 프롬프트 내용이 저장되나요?
+A: 아니요, 오직 토큰 수와 비용만 저장됩니다.
+
+Q: 여러 모델을 동시에 사용할 수 있나요?
+A: 네, 각 API 호출별로 독립적으로 추적됩니다.
+
+Q: 기존 코드를 많이 수정해야 하나요?
+A: 아니요, wrap() 메서드 한 줄만 추가하면 됩니다.
+
+## 연락처 및 기여
+- GitHub: github.com/[username]/ai-token-tracker
+- Issues: 버그 리포트 및 기능 제안 환영
+- PR: 기여 가이드라인 참조
+- License: MIT

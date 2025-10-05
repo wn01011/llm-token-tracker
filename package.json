@@ -1,0 +1,47 @@
+{
+  "name": "ai-token-tracker",
+  "version": "0.1.0",
+  "description": "Token usage tracker for OpenAI and Claude APIs. Pass accurate API costs to your users.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "example": "node examples/basic-usage.js",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "openai",
+    "claude",
+    "anthropic",
+    "token-tracking",
+    "usage-billing",
+    "api-monitoring",
+    "cost-tracking"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "tiktoken": "^1.0.10"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@anthropic-ai/sdk": "^0.20.9",
+    "openai": "^4.104.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/ai-token-tracker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/ai-token-tracker/issues"
+  },
+  "homepage": "https://github.com/yourusername/ai-token-tracker#readme"
+}
