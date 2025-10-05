@@ -403,6 +403,30 @@ class TokenTrackerMCPServer {
   }
 }
 
+// CLI argument handling
+const args = process.argv.slice(2);
+
+if (args.includes('--version') || args.includes('-v')) {
+  console.log('2.3.0');
+  process.exit(0);
+}
+
+if (args.includes('--help') || args.includes('-h')) {
+  console.log(`
+LLM Token Tracker MCP Server v2.3.0
+
+Usage:
+  llm-token-tracker          Start MCP server
+  llm-token-tracker -v       Show version
+  llm-token-tracker --version Show version
+  llm-token-tracker -h       Show help
+  llm-token-tracker --help    Show help
+
+MCP Server for tracking token usage and costs for OpenAI and Claude APIs.
+  `);
+  process.exit(0);
+}
+
 // Run server
 const server = new TokenTrackerMCPServer();
 server.run().catch(console.error);
