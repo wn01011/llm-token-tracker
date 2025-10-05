@@ -13,6 +13,14 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { TokenTracker } from './tracker.js';
 import { formatCost } from './pricing.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
+const VERSION = packageJson.version;
 
 class TokenTrackerMCPServer {
   private server: Server;
@@ -24,7 +32,7 @@ class TokenTrackerMCPServer {
     this.server = new Server(
       {
         name: 'llm-token-tracker',
-        version: '2.3.0',
+        version: VERSION,
       },
       {
         capabilities: {
@@ -407,13 +415,13 @@ class TokenTrackerMCPServer {
 const args = process.argv.slice(2);
 
 if (args.includes('--version') || args.includes('-v')) {
-  console.log('2.3.0');
+  console.log(VERSION);
   process.exit(0);
 }
 
 if (args.includes('--help') || args.includes('-h')) {
   console.log(`
-LLM Token Tracker MCP Server v2.3.0
+LLM Token Tracker MCP Server v${VERSION}
 
 Usage:
   llm-token-tracker          Start MCP server
