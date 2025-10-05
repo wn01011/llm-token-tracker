@@ -24,7 +24,7 @@ class TokenTrackerMCPServer {
     this.server = new Server(
       {
         name: 'llm-token-tracker',
-        version: '2.2.0',
+        version: '2.3.0',
       },
       {
         capabilities: {
@@ -129,6 +129,20 @@ class TokenTrackerMCPServer {
             },
             required: ['user_id']
           }
+        },
+        {
+          name: 'get_exchange_rate',
+          description: 'Get current USD to KRW exchange rate with cache info',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              force_refresh: {
+                type: 'boolean',
+                description: 'Force refresh from API (default: false)',
+                default: false
+              }
+            }
+          }
         }
       ]
     }));
@@ -145,6 +159,8 @@ class TokenTrackerMCPServer {
           return this.compareCosts(request.params.arguments);
         case 'clear_usage':
           return this.clearUsage(request.params.arguments);
+        case 'get_exchange_rate':
+          return this.getExchangeRate(request.params.arguments);
         default:
           throw new Error(`Unknown tool: ${request.params.name}`);
       }
@@ -326,6 +342,58 @@ class TokenTrackerMCPServer {
         }
       ]
     };
+  }
+
+  private async getExchangeRate(args: any) {
+    const { force_refresh = false } = args;
+    
+    try {
+      let rate: number;
+      let info: any;
+      
+      if (force_refresh) {
+        rate = await this.tracker.refreshExchangeRate();
+        info = await this.tracker.getExchangeRateInfo();
+      } else {
+        info = await this.tracker.getExchangeRateInfo();
+        rate = info.rate;
+      }
+      
+      const lastUpdated = info.lastUpdated 
+        ? new Date(info.lastUpdated).toLocaleString()
+        : 'Never';
+      
+      const timeSinceUpdate = info.lastUpdated
+        ? Math.round((Date.now() - new Date(info.lastUpdated).getTime()) / (1000 * 60 * 60))
+        : null;
+      
+      let result = `💱 Exchange Rate (USD to KRW)\n`;
+      result += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+      result += `💵 Current Rate: ₩${rate.toFixed(2)}\n`;
+      result += `📅 Last Updated: ${lastUpdated}\n`;
+      
+      if (timeSinceUpdate !== null) {
+        result += `⏰ ${timeSinceUpdate} hours ago\n`;
+      }
+      
+      result += `🔄 Source: ${info.source || 'fallback'}\n`;
+      result += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+      result += `💡 Rate updates automatically every 24 hours\n`;
+      result += `   Cache location: ~/.llm-token-tracker/exchange-rate.json`;
+      
+      return {
+        content: [{ type: 'text', text: result }]
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `❌ Failed to get exchange rate: ${error instanceof Error ? error.message : 'Unknown error'}`
+          }
+        ]
+      };
+    }
   }
 
   async run() {

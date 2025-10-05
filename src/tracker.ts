@@ -7,6 +7,7 @@ import { OpenAIWrapper } from './providers/openai.js';
 import { AnthropicWrapper } from './providers/anthropic.js';
 import { calculateCost } from './pricing.js';
 import { FileStorage } from './storage.js';
+import { ExchangeRateManager } from './exchange-rate.js';
 
 export class TokenTracker {
   private config: TrackerConfig;
@@ -14,6 +15,7 @@ export class TokenTracker {
   private activeTracking: Map<string, any> = new Map();
   private userTotals: Map<string, UserUsage> = new Map();
   private storage: FileStorage | null = null;
+  private exchangeRateManager: ExchangeRateManager;
 
   constructor(config: TrackerConfig = {}) {
     this.config = {
@@ -22,6 +24,9 @@ export class TokenTracker {
       enableFileStorage: true, // Enable by default
       ...config
     };
+
+    // Initialize exchange rate manager
+    this.exchangeRateManager = new ExchangeRateManager(24); // Cache for 24 hours
 
     // Initialize file storage
     if (this.config.enableFileStorage !== false) {
@@ -150,8 +155,19 @@ export class TokenTracker {
     const costUSD = calculateCost(provider, model, inputTokens, outputTokens);
     
     if (this.config.currency === 'KRW') {
+      // Note: Exchange rate is fetched asynchronously in the background
+      // We use a cached rate here for immediate response
+      // The rate is automatically updated every 24 hours
+      const cachedRate = this.exchangeRateManager.getCacheInfo();
+      const exchangeRate = cachedRate?.rate || 1380; // Fallback to 1380 if no cache
+      
+      // Trigger async rate update in background (non-blocking)
+      this.exchangeRateManager.getUSDtoKRW().catch(err => {
+        console.error('Background exchange rate update failed:', err);
+      });
+      
       return {
-        amount: costUSD * 1300, // Approximate exchange rate
+        amount: costUSD * exchangeRate,
         currency: 'KRW'
       };
     }
@@ -264,6 +280,31 @@ export class TokenTracker {
     this.userTotals.clear();
     
     return this.storage.clear();
+  }
+
+  /**
+   * Get current exchange rate info (USD to KRW)
+   */
+  async getExchangeRateInfo(): Promise<{
+    rate: number;
+    lastUpdated: string | null;
+    source: string | null;
+  }> {
+    const cached = this.exchangeRateManager.getCacheInfo();
+    const currentRate = await this.exchangeRateManager.getUSDtoKRW();
+    
+    return {
+      rate: currentRate,
+      lastUpdated: cached?.lastUpdated || null,
+      source: cached?.source || null
+    };
+  }
+
+  /**
+   * Force refresh exchange rate
+   */
+  async refreshExchangeRate(): Promise<number> {
+    return await this.exchangeRateManager.forceRefresh();
   }
 
   /**

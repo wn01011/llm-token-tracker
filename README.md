@@ -237,7 +237,15 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 For bugs and feature requests, please [create an issue](https://github.com/wn01011/llm-token-tracker/issues).
 
-## 📦 What's New in v2.2.0
+## 📦 What's New in v2.3.0
+
+- 💱 **Real-time exchange rates** - Automatic USD to KRW conversion
+- 🌐 Uses exchangerate-api.com for accurate rates
+- 💾 24-hour caching to minimize API calls
+- 📊 New `get_exchange_rate` tool to check current rates
+- 🔄 Background auto-updates with fallback support
+
+## What's New in v2.2.0
 
 - 🗄️ **File-based persistence** - Session data survives server restarts
 - 💾 Automatic saving to `~/.llm-token-tracker/sessions.json`
