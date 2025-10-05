@@ -1,6 +1,6 @@
 {
   "name": "llm-token-tracker",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "Token usage tracker for OpenAI and Claude APIs with MCP support - Updated 2025 pricing",
   "type": "module",
   "main": "dist/index.js",
@@ -27,6 +27,9 @@
   ],
   "author": "wn01011",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "tiktoken": "^1.0.10"

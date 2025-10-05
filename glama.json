@@ -1,0 +1,19 @@
+{
+  "name": "llm-token-tracker",
+  "description": "Token usage tracker for OpenAI and Claude APIs with MCP support - Updated 2025 pricing",
+  "version": "2.3.4",
+  "author": "wn01011",
+  "license": "MIT",
+  "homepage": "https://github.com/wn01011/llm-token-tracker",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wn01011/llm-token-tracker.git"
+  },
+  "mcp": {
+    "command": "node",
+    "args": ["/app/dist/mcp-server.js"],
+    "env": {}
+  },
+  "tags": ["token-tracking", "openai", "claude", "anthropic", "mcp", "cost-tracking"],
+  "categories": ["development", "ai", "analytics"]
+}
