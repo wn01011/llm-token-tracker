@@ -141,14 +141,14 @@ export function calculateCost(
     for (const gptModel of gptModels) {
       if (normalizedModel.includes(gptModel)) {
         // Map normalized names back to pricing keys
-        let pricingKey = gptModel;
-        if (gptModel === 'gpt-4-1') pricingKey = 'gpt-4.1' as any;
-        if (gptModel === 'gpt-4-1-mini') pricingKey = 'gpt-4.1-mini' as any;
-        if (gptModel === 'gpt-3-5-turbo') pricingKey = 'gpt-3.5-turbo' as any;
-        if (gptModel === 'gpt-3-5-turbo-16k') pricingKey = 'gpt-3.5-turbo-16k' as any;
+        let pricingKey: keyof typeof openaiPricing = gptModel as any;
+        if (gptModel === 'gpt-4-1') pricingKey = 'gpt-4.1';
+        if (gptModel === 'gpt-4-1-mini') pricingKey = 'gpt-4.1-mini';
+        if (gptModel === 'gpt-3-5-turbo') pricingKey = 'gpt-3.5-turbo';
+        if (gptModel === 'gpt-3-5-turbo-16k') pricingKey = 'gpt-3.5-turbo-16k';
         
         const modelPricing = openaiPricing[pricingKey];
-        if (typeof modelPricing === 'object' && 'input' in modelPricing) {
+        if (modelPricing && typeof modelPricing === 'object' && 'input' in modelPricing) {
           const inputCost = (inputTokens / 1000) * modelPricing.input;
           const outputCost = (outputTokens / 1000) * modelPricing.output;
           return inputCost + outputCost;
@@ -182,19 +182,21 @@ export function calculateCost(
     for (const claudeModel of claudeModels) {
       if (normalizedModel.includes(claudeModel)) {
         // Map normalized names back to pricing keys
-        let pricingKey = claudeModel;
-        if (claudeModel === 'claude-opus-4-1-20250805') pricingKey = 'claude-opus-4.1-20250805' as any;
-        if (claudeModel === 'claude-sonnet-4-5-20250929') pricingKey = 'claude-sonnet-4.5-20250929' as any;
-        if (claudeModel === 'claude-3-5-sonnet-20241022') pricingKey = 'claude-3.5-sonnet-20241022' as any;
-        if (claudeModel === 'claude-3-5-haiku-20241022') pricingKey = 'claude-3.5-haiku-20241022' as any;
-        if (claudeModel === 'claude-2-1') pricingKey = 'claude-2.1' as any;
-        if (claudeModel === 'claude-2-0') pricingKey = 'claude-2.0' as any;
-        if (claudeModel === 'claude-instant-1-2') pricingKey = 'claude-instant-1.2' as any;
+        let pricingKey: keyof typeof anthropicPricing = claudeModel as any;
+        if (claudeModel === 'claude-opus-4-1-20250805') pricingKey = 'claude-opus-4.1-20250805';
+        if (claudeModel === 'claude-sonnet-4-5-20250929') pricingKey = 'claude-sonnet-4.5-20250929';
+        if (claudeModel === 'claude-3-5-sonnet-20241022') pricingKey = 'claude-3.5-sonnet-20241022';
+        if (claudeModel === 'claude-3-5-haiku-20241022') pricingKey = 'claude-3.5-haiku-20241022';
+        if (claudeModel === 'claude-2-1') pricingKey = 'claude-2.1';
+        if (claudeModel === 'claude-2-0') pricingKey = 'claude-2.0';
+        if (claudeModel === 'claude-instant-1-2') pricingKey = 'claude-instant-1.2';
         
         const modelPricing = anthropicPricing[pricingKey];
-        const inputCost = (inputTokens / 1000) * modelPricing.input;
-        const outputCost = (outputTokens / 1000) * modelPricing.output;
-        return inputCost + outputCost;
+        if (modelPricing) {
+          const inputCost = (inputTokens / 1000) * modelPricing.input;
+          const outputCost = (outputTokens / 1000) * modelPricing.output;
+          return inputCost + outputCost;
+        }
       }
     }
     
