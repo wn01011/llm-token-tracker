@@ -1,6 +1,9 @@
-# AI Token Tracker 🧮
+# LLM Token Tracker 🧮
 
 Token usage tracker for OpenAI and Claude APIs. Pass accurate API costs to your users.
+
+[![npm version](https://badge.fury.io/js/llm-token-tracker.svg)](https://www.npmjs.com/package/llm-token-tracker)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## ✨ Features
 
@@ -14,14 +17,14 @@ Token usage tracker for OpenAI and Claude APIs. Pass accurate API costs to your 
 ## 📦 Installation
 
 ```bash
-npm install ai-token-tracker
+npm install llm-token-tracker
 ```
 
 ## 🚀 Quick Start
 
 ```javascript
-const { TokenTracker } = require('ai-token-tracker');
-// or import { TokenTracker } from 'ai-token-tracker';
+const { TokenTracker } = require('llm-token-tracker');
+// or import { TokenTracker } from 'llm-token-tracker';
 
 // Initialize tracker
 const tracker = new TokenTracker({
@@ -52,7 +55,7 @@ To use with actual OpenAI/Anthropic APIs:
 
 ```javascript
 const OpenAI = require('openai');
-const { TokenTracker } = require('ai-token-tracker');
+const { TokenTracker } = require('llm-token-tracker');
 
 const tracker = new TokenTracker();
 const openai = tracker.wrap(new OpenAI({
@@ -146,7 +149,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 🐛 Issues
 
-For bugs and feature requests, please [create an issue](https://github.com/yourusername/ai-token-tracker/issues).
+For bugs and feature requests, please [create an issue](https://github.com/yourusername/llm-token-tracker/issues).
 
 ---
 

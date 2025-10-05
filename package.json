@@ -1,9 +1,14 @@
 {
-  "name": "ai-token-tracker",
-  "version": "0.1.0",
+  "name": "llm-token-tracker",
+  "version": "1.0.0",
   "description": "Token usage tracker for OpenAI and Claude APIs. Pass accurate API costs to your users.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

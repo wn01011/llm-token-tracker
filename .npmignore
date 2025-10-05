@@ -1,0 +1,35 @@
+# Source files
+src/
+examples/
+*.ts
+!dist/**/*.d.ts
+
+# Configuration files
+tsconfig.json
+tsconfig.examples.json
+.gitignore
+.npmignore
+
+# Environment and logs
+.env
+.env.*
+!.env.example
+*.log
+npm-debug.log*
+
+# Development folders
+node_modules/
+coverage/
+.vscode/
+.idea/
+.claude/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build files
+*.tsbuildinfo
+
+# Documentation
+PROJECT.md
