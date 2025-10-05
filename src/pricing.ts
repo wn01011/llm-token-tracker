@@ -2,18 +2,37 @@
  * Pricing calculations for different AI models
  */
 
-// Pricing in USD per 1000 tokens
+// Pricing in USD per 1000 tokens (2025 updated)
 export const PRICING = {
   openai: {
+    // GPT-5 Series (2025)
+    'gpt-5': { input: 0.00125, output: 0.010 },
+    'gpt-5-mini': { input: 0.00025, output: 0.0010 },
+    // GPT-4.1 Series (2025)
+    'gpt-4.1': { input: 0.0020, output: 0.008 },
+    'gpt-4.1-mini': { input: 0.00015, output: 0.0006 },
+    // GPT-4o Series
+    'gpt-4o': { input: 0.0025, output: 0.010 },
+    'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
+    // o1 Series (Reasoning models)
+    'o1': { input: 0.015, output: 0.060 },
+    'o1-mini': { input: 0.0011, output: 0.0044 },
+    'o1-pro': { input: 0.015, output: 0.060 },
+    'o3-mini': { input: 0.0011, output: 0.0044 },
+    'o4-mini': { input: 0.0011, output: 0.0044 },
+    // Legacy GPT-4
     'gpt-4-turbo-preview': { input: 0.01, output: 0.03 },
     'gpt-4-turbo': { input: 0.01, output: 0.03 },
     'gpt-4': { input: 0.03, output: 0.06 },
     'gpt-4-32k': { input: 0.06, output: 0.12 },
+    // GPT-3.5
     'gpt-3.5-turbo': { input: 0.0005, output: 0.0015 },
     'gpt-3.5-turbo-16k': { input: 0.001, output: 0.002 },
+    // Embeddings
     'text-embedding-ada-002': { input: 0.0001, output: 0 },
     'text-embedding-3-small': { input: 0.00002, output: 0 },
     'text-embedding-3-large': { input: 0.00013, output: 0 },
+    // Image generation
     'dall-e-3': { 
       standard: { '1024x1024': 0.040, '1024x1792': 0.080, '1792x1024': 0.080 },
       hd: { '1024x1024': 0.080, '1024x1792': 0.120, '1792x1024': 0.120 }
@@ -23,14 +42,25 @@ export const PRICING = {
       '512x512': 0.018,
       '256x256': 0.016
     },
+    // Audio
     'whisper-1': { perMinute: 0.006 },
     'tts-1': { perChar: 0.000015 },
     'tts-1-hd': { perChar: 0.000030 }
   },
   anthropic: {
+    // Claude 4 Series (2025)
+    'claude-opus-4.1-20250805': { input: 0.015, output: 0.075 },
+    'claude-opus-4-20250522': { input: 0.015, output: 0.075 },
+    'claude-opus-4-20250514': { input: 0.015, output: 0.075 },
+    'claude-sonnet-4.5-20250929': { input: 0.003, output: 0.015 },
+    'claude-sonnet-4-20250514': { input: 0.003, output: 0.015 },
+    // Claude 3 Series
+    'claude-3.5-sonnet-20241022': { input: 0.003, output: 0.015 },
+    'claude-3.5-haiku-20241022': { input: 0.00025, output: 0.00125 },
     'claude-3-opus-20240229': { input: 0.015, output: 0.075 },
     'claude-3-sonnet-20240229': { input: 0.003, output: 0.015 },
     'claude-3-haiku-20240307': { input: 0.00025, output: 0.00125 },
+    // Claude 2 Series
     'claude-2.1': { input: 0.008, output: 0.024 },
     'claude-2.0': { input: 0.008, output: 0.024 },
     'claude-instant-1.2': { input: 0.0008, output: 0.0024 }
@@ -86,7 +116,15 @@ export function calculateCost(
     
     // Standard token-based pricing for GPT models
     const gptModels = [
+      // GPT-5 and 4.1 series
+      'gpt-5', 'gpt-5-mini', 'gpt-4.1', 'gpt-4.1-mini',
+      // GPT-4o series
+      'gpt-4o', 'gpt-4o-mini',
+      // o1 reasoning series
+      'o1', 'o1-mini', 'o1-pro', 'o3-mini', 'o4-mini',
+      // Legacy GPT-4
       'gpt-4-turbo-preview', 'gpt-4-turbo', 'gpt-4', 'gpt-4-32k',
+      // GPT-3.5
       'gpt-3.5-turbo', 'gpt-3.5-turbo-16k'
     ] as const;
     
@@ -114,7 +152,13 @@ export function calculateCost(
   if (provider === 'anthropic') {
     const anthropicPricing = PRICING.anthropic;
     const claudeModels = [
+      // Claude 4 series
+      'claude-opus-4.1-20250805', 'claude-opus-4-20250522', 'claude-opus-4-20250514',
+      'claude-sonnet-4.5-20250929', 'claude-sonnet-4-20250514',
+      // Claude 3 series
+      'claude-3.5-sonnet-20241022', 'claude-3.5-haiku-20241022',
       'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307',
+      // Claude 2 series
       'claude-2.1', 'claude-2.0', 'claude-instant-1.2'
     ] as const;
     
@@ -127,7 +171,7 @@ export function calculateCost(
       }
     }
     
-    // Default Claude pricing if model not found
+    // Default Claude pricing if model not found (use Claude 3 Sonnet as baseline)
     const defaultPricing = anthropicPricing['claude-3-sonnet-20240229'];
     const inputCost = (inputTokens / 1000) * defaultPricing.input;
     const outputCost = (outputTokens / 1000) * defaultPricing.output;
@@ -179,6 +223,22 @@ export function formatCost(amount: number, currency: string = 'USD'): string {
 export function getModelDisplayName(provider: string, model: string): string {
   const displayNames: Record<string, Record<string, string>> = {
     openai: {
+      // GPT-5 series
+      'gpt-5': 'GPT-5',
+      'gpt-5-mini': 'GPT-5 Mini',
+      // GPT-4.1 series
+      'gpt-4.1': 'GPT-4.1',
+      'gpt-4.1-mini': 'GPT-4.1 Mini',
+      // GPT-4o series
+      'gpt-4o': 'GPT-4o',
+      'gpt-4o-mini': 'GPT-4o Mini',
+      // o1 series
+      'o1': 'o1',
+      'o1-mini': 'o1 Mini',
+      'o1-pro': 'o1 Pro',
+      'o3-mini': 'o3 Mini',
+      'o4-mini': 'o4 Mini',
+      // Legacy
       'gpt-4-turbo-preview': 'GPT-4 Turbo',
       'gpt-4': 'GPT-4',
       'gpt-3.5-turbo': 'GPT-3.5 Turbo',
@@ -186,6 +246,15 @@ export function getModelDisplayName(provider: string, model: string): string {
       'whisper-1': 'Whisper'
     },
     anthropic: {
+      // Claude 4 series
+      'claude-opus-4.1-20250805': 'Claude Opus 4.1',
+      'claude-opus-4-20250522': 'Claude Opus 4',
+      'claude-opus-4-20250514': 'Claude Opus 4',
+      'claude-sonnet-4.5-20250929': 'Claude Sonnet 4.5',
+      'claude-sonnet-4-20250514': 'Claude Sonnet 4',
+      // Claude 3 series
+      'claude-3.5-sonnet-20241022': 'Claude 3.5 Sonnet',
+      'claude-3.5-haiku-20241022': 'Claude 3.5 Haiku',
       'claude-3-opus-20240229': 'Claude 3 Opus',
       'claude-3-sonnet-20240229': 'Claude 3 Sonnet',
       'claude-3-haiku-20240307': 'Claude 3 Haiku'

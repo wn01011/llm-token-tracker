@@ -95,23 +95,48 @@ Then in Claude:
 - "Compare costs between GPT-4 and Claude"
 - "Show my total spending today"
 
-## 📊 Supported Models & Pricing
+## 📊 Supported Models & Pricing (Updated 2025)
 
-### OpenAI
-| Model | Input (per 1K tokens) | Output (per 1K tokens) |
-|-------|----------------------|------------------------|
-| GPT-4 Turbo | $0.01 | $0.03 |
-| GPT-4 | $0.03 | $0.06 |
-| GPT-3.5 Turbo | $0.0005 | $0.0015 |
-| DALL-E 3 | $0.040 per image | - |
-| Whisper | $0.006 per minute | - |
+### OpenAI (2025)
+| Model | Input (per 1K tokens) | Output (per 1K tokens) | Notes |
+|-------|----------------------|------------------------|-------|
+| **GPT-5 Series** | | | |
+| GPT-5 | $0.00125 | $0.010 | Latest flagship model |
+| GPT-5 Mini | $0.00025 | $0.0010 | Compact version |
+| **GPT-4.1 Series** | | | |
+| GPT-4.1 | $0.0020 | $0.008 | Advanced reasoning |
+| GPT-4.1 Mini | $0.00015 | $0.0006 | Cost-effective |
+| **GPT-4o Series** | | | |
+| GPT-4o | $0.0025 | $0.010 | Multimodal |
+| GPT-4o Mini | $0.00015 | $0.0006 | Fast & cheap |
+| **o1 Reasoning Series** | | | |
+| o1 | $0.015 | $0.060 | Advanced reasoning |
+| o1 Mini | $0.0011 | $0.0044 | Efficient reasoning |
+| o1 Pro | $0.015 | $0.060 | Pro reasoning |
+| **Legacy Models** | | | |
+| GPT-4 Turbo | $0.01 | $0.03 | |
+| GPT-4 | $0.03 | $0.06 | |
+| GPT-3.5 Turbo | $0.0005 | $0.0015 | Most affordable |
+| **Media Models** | | | |
+| DALL-E 3 | $0.040 per image | - | Image generation |
+| Whisper | $0.006 per minute | - | Speech-to-text |
 
-### Anthropic
-| Model | Input (per 1K tokens) | Output (per 1K tokens) |
-|-------|----------------------|------------------------|
-| Claude 3 Opus | $0.015 | $0.075 |
-| Claude 3 Sonnet | $0.003 | $0.015 |
-| Claude 3 Haiku | $0.00025 | $0.00125 |
+### Anthropic (2025)
+| Model | Input (per 1K tokens) | Output (per 1K tokens) | Notes |
+|-------|----------------------|------------------------|-------|
+| **Claude 4 Series** | | | |
+| Claude Opus 4.1 | $0.015 | $0.075 | Most powerful |
+| Claude Opus 4 | $0.015 | $0.075 | Flagship model |
+| Claude Sonnet 4.5 | $0.003 | $0.015 | Best for coding |
+| Claude Sonnet 4 | $0.003 | $0.015 | Balanced |
+| **Claude 3 Series** | | | |
+| Claude 3.5 Sonnet | $0.003 | $0.015 | |
+| Claude 3.5 Haiku | $0.00025 | $0.00125 | Fastest |
+| Claude 3 Opus | $0.015 | $0.075 | |
+| Claude 3 Sonnet | $0.003 | $0.015 | |
+| Claude 3 Haiku | $0.00025 | $0.00125 | Most affordable |
+
+**Note:** Prices shown are per 1,000 tokens. Batch API offers 50% discount. Prompt caching can reduce costs by up to 90%.
 
 ## 🎯 Examples
 

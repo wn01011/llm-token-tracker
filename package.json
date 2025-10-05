@@ -1,7 +1,7 @@
 {
   "name": "llm-token-tracker",
-  "version": "2.0.0",
-  "description": "Token usage tracker for OpenAI and Claude APIs with MCP support",
+  "version": "2.0.1",
+  "description": "Token usage tracker for OpenAI and Claude APIs with MCP support - Updated 2025 pricing",
   "type": "module",
   "main": "dist/index.js",
   "bin": {

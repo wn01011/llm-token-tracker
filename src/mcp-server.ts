@@ -250,8 +250,6 @@ class TokenTrackerMCPServer {
   }
 }
 
-// Run if called directly
-if (require.main === module) {
-  const server = new TokenTrackerMCPServer();
-  server.run().catch(console.error);
-}
+// Run server
+const server = new TokenTrackerMCPServer();
+server.run().catch(console.error);
