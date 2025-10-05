@@ -9,6 +9,16 @@ import { calculateCost } from './pricing.js';
 import { FileStorage } from './storage.js';
 import { ExchangeRateManager } from './exchange-rate.js';
 
+/**
+ * Normalize model name to ensure consistency
+ * Converts version numbers with dots to hyphens (e.g., 4.5 -> 4-5)
+ */
+function normalizeModelName(model: string): string {
+  // Replace dots in version numbers with hyphens for consistency
+  // e.g., claude-sonnet-4.5-20250929 -> claude-sonnet-4-5-20250929
+  return model.replace(/(\d+)\.(\d+)/g, '$1-$2');
+}
+
 export class TokenTracker {
   private config: TrackerConfig;
   private usageHistory: Map<string, TokenUsage[]> = new Map();
@@ -87,16 +97,19 @@ export class TokenTracker {
       throw new Error(`Tracking ID ${trackingId} not found`);
     }
 
+    // Normalize model name for consistency
+    const normalizedModel = usage.model ? normalizeModelName(usage.model) : 'unknown';
+
     const fullUsage: TokenUsage = {
       provider: usage.provider || 'openai',
-      model: usage.model || 'unknown',
+      model: normalizedModel,
       totalTokens: usage.totalTokens || 
                    ((usage.inputTokens || 0) + (usage.outputTokens || 0)),
       inputTokens: usage.inputTokens,
       outputTokens: usage.outputTokens,
       cost: usage.cost || this.calculateCost(
         usage.provider || 'openai',
-        usage.model || 'unknown',
+        normalizedModel,
         usage.inputTokens || 0,
         usage.outputTokens || 0
       ),

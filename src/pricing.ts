@@ -2,6 +2,13 @@
  * Pricing calculations for different AI models
  */
 
+/**
+ * Normalize model name to ensure consistency
+ */
+function normalizeModelName(model: string): string {
+  return model.replace(/(\d+)\.(\d+)/g, '$1-$2');
+}
+
 // Pricing in USD per 1000 tokens (2025 updated)
 export const PRICING = {
   openai: {
@@ -76,12 +83,15 @@ export function calculateCost(
   inputTokens: number,
   outputTokens: number
 ): number {
+  // Normalize model name for consistent matching
+  const normalizedModel = normalizeModelName(model);
+  
   // Type-safe provider pricing access
   if (provider === 'openai') {
     const openaiPricing = PRICING.openai;
     
     // Special handling for DALL-E (image generation)
-    if (model.startsWith('dall-e')) {
+    if (normalizedModel.startsWith('dall-e')) {
       // For DALL-E, inputTokens represents the number of images
       if ('dall-e-3' in openaiPricing) {
         const dalleModel = openaiPricing['dall-e-3'];
@@ -93,7 +103,7 @@ export function calculateCost(
     }
     
     // Special handling for Whisper (audio)
-    if (model === 'whisper-1') {
+    if (normalizedModel === 'whisper-1') {
       // For Whisper, inputTokens represents seconds of audio
       if ('whisper-1' in openaiPricing) {
         const whisperPricing = openaiPricing['whisper-1'];
@@ -104,8 +114,8 @@ export function calculateCost(
     }
     
     // Special handling for TTS
-    if (model.startsWith('tts-')) {
-      const ttsKey = model as 'tts-1' | 'tts-1-hd';
+    if (normalizedModel.startsWith('tts-')) {
+      const ttsKey = normalizedModel as 'tts-1' | 'tts-1-hd';
       if (ttsKey in openaiPricing) {
         const ttsModel = openaiPricing[ttsKey];
         if (typeof ttsModel === 'object' && 'perChar' in ttsModel) {
@@ -116,8 +126,8 @@ export function calculateCost(
     
     // Standard token-based pricing for GPT models
     const gptModels = [
-      // GPT-5 and 4.1 series
-      'gpt-5', 'gpt-5-mini', 'gpt-4.1', 'gpt-4.1-mini',
+      // GPT-5 and 4.1 series (with normalized names)
+      'gpt-5', 'gpt-5-mini', 'gpt-4-1', 'gpt-4-1-mini',
       // GPT-4o series
       'gpt-4o', 'gpt-4o-mini',
       // o1 reasoning series
@@ -125,12 +135,19 @@ export function calculateCost(
       // Legacy GPT-4
       'gpt-4-turbo-preview', 'gpt-4-turbo', 'gpt-4', 'gpt-4-32k',
       // GPT-3.5
-      'gpt-3.5-turbo', 'gpt-3.5-turbo-16k'
+      'gpt-3-5-turbo', 'gpt-3-5-turbo-16k'
     ] as const;
     
     for (const gptModel of gptModels) {
-      if (model.includes(gptModel)) {
-        const modelPricing = openaiPricing[gptModel];
+      if (normalizedModel.includes(gptModel)) {
+        // Map normalized names back to pricing keys
+        let pricingKey = gptModel;
+        if (gptModel === 'gpt-4-1') pricingKey = 'gpt-4.1' as any;
+        if (gptModel === 'gpt-4-1-mini') pricingKey = 'gpt-4.1-mini' as any;
+        if (gptModel === 'gpt-3-5-turbo') pricingKey = 'gpt-3.5-turbo' as any;
+        if (gptModel === 'gpt-3-5-turbo-16k') pricingKey = 'gpt-3.5-turbo-16k' as any;
+        
+        const modelPricing = openaiPricing[pricingKey];
         if (typeof modelPricing === 'object' && 'input' in modelPricing) {
           const inputCost = (inputTokens / 1000) * modelPricing.input;
           const outputCost = (outputTokens / 1000) * modelPricing.output;
@@ -152,19 +169,29 @@ export function calculateCost(
   if (provider === 'anthropic') {
     const anthropicPricing = PRICING.anthropic;
     const claudeModels = [
-      // Claude 4 series
-      'claude-opus-4.1-20250805', 'claude-opus-4-20250522', 'claude-opus-4-20250514',
-      'claude-sonnet-4.5-20250929', 'claude-sonnet-4-20250514',
+      // Claude 4 series (normalized names)
+      'claude-opus-4-1-20250805', 'claude-opus-4-20250522', 'claude-opus-4-20250514',
+      'claude-sonnet-4-5-20250929', 'claude-sonnet-4-20250514',
       // Claude 3 series
-      'claude-3.5-sonnet-20241022', 'claude-3.5-haiku-20241022',
+      'claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022',
       'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307',
       // Claude 2 series
-      'claude-2.1', 'claude-2.0', 'claude-instant-1.2'
+      'claude-2-1', 'claude-2-0', 'claude-instant-1-2'
     ] as const;
     
     for (const claudeModel of claudeModels) {
-      if (model.includes(claudeModel)) {
-        const modelPricing = anthropicPricing[claudeModel];
+      if (normalizedModel.includes(claudeModel)) {
+        // Map normalized names back to pricing keys
+        let pricingKey = claudeModel;
+        if (claudeModel === 'claude-opus-4-1-20250805') pricingKey = 'claude-opus-4.1-20250805' as any;
+        if (claudeModel === 'claude-sonnet-4-5-20250929') pricingKey = 'claude-sonnet-4.5-20250929' as any;
+        if (claudeModel === 'claude-3-5-sonnet-20241022') pricingKey = 'claude-3.5-sonnet-20241022' as any;
+        if (claudeModel === 'claude-3-5-haiku-20241022') pricingKey = 'claude-3.5-haiku-20241022' as any;
+        if (claudeModel === 'claude-2-1') pricingKey = 'claude-2.1' as any;
+        if (claudeModel === 'claude-2-0') pricingKey = 'claude-2.0' as any;
+        if (claudeModel === 'claude-instant-1-2') pricingKey = 'claude-instant-1.2' as any;
+        
+        const modelPricing = anthropicPricing[pricingKey];
         const inputCost = (inputTokens / 1000) * modelPricing.input;
         const outputCost = (outputTokens / 1000) * modelPricing.output;
         return inputCost + outputCost;
