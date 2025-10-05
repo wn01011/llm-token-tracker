@@ -24,7 +24,7 @@ class TokenTrackerMCPServer {
     this.server = new Server(
       {
         name: 'llm-token-tracker',
-        version: '2.0.0',
+        version: '2.1.0',
       },
       {
         capabilities: {
@@ -68,6 +68,25 @@ class TokenTrackerMCPServer {
               }
             },
             required: ['provider', 'model', 'input_tokens', 'output_tokens']
+          }
+        },
+        {
+          name: 'get_current_session',
+          description: 'Get current session usage with intuitive format (remaining, used, input/output tokens, cost)',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              user_id: {
+                type: 'string',
+                description: 'User ID (defaults to current-session)',
+                default: 'current-session'
+              },
+              total_budget: {
+                type: 'number',
+                description: 'Total token budget (optional)',
+                default: 190000
+              }
+            }
           }
         },
         {
@@ -118,6 +137,8 @@ class TokenTrackerMCPServer {
       switch (request.params.name) {
         case 'track_usage':
           return this.trackUsage(request.params.arguments);
+        case 'get_current_session':
+          return this.getCurrentSession(request.params.arguments);
         case 'get_usage':
           return this.getUsage(request.params.arguments);
         case 'compare_costs':
@@ -131,7 +152,7 @@ class TokenTrackerMCPServer {
   }
 
   private trackUsage(args: any) {
-    const { provider, model, input_tokens, output_tokens, user_id = 'default' } = args;
+    const { provider, model, input_tokens, output_tokens, user_id = 'current-session' } = args;
     
     const trackingId = this.tracker.startTracking(user_id);
     this.tracker.endTracking(trackingId, {
@@ -143,18 +164,82 @@ class TokenTrackerMCPServer {
     });
 
     const usage = this.tracker.getUserUsage(user_id);
-    const modelKey = `${provider}/${model}`;
-    const sessionCost = usage?.usageByModel[modelKey]?.cost || 0;
+    const totalTokens = input_tokens + output_tokens;
+    const cost = usage?.totalCost || 0;
     
     return {
       content: [
         {
           type: 'text',
-          text: `✅ Tracked ${input_tokens + output_tokens} tokens for ${model}\n` +
-                `💰 Cost: ${formatCost(sessionCost)}\n` +
-                `📊 Total: ${usage?.totalTokens || 0} tokens (${formatCost(usage?.totalCost || 0)})`
+          text: `✅ Tracked ${totalTokens.toLocaleString()} tokens for ${model}\n` +
+                `💰 Session Cost: ${formatCost(cost)}\n` +
+                `📊 Total: ${usage?.totalTokens.toLocaleString() || 0} tokens`
         }
       ]
+    };
+  }
+
+  private getCurrentSession(args: any) {
+    const { user_id = 'current-session', total_budget = 190000 } = args;
+    
+    const usage = this.tracker.getUserUsage(user_id);
+    
+    if (!usage) {
+      return {
+        content: [{
+          type: 'text',
+          text: `💰 Current Session\n` +
+                `━━━━━━━━━━━━━━━━━━━━━━\n` +
+                `📊 Used: 0 tokens\n` +
+                `✨ Remaining: ${total_budget.toLocaleString()} tokens\n` +
+                `📥 Input: 0 tokens\n` +
+                `📤 Output: 0 tokens\n` +
+                `💵 Cost: $0.0000\n` +
+                `━━━━━━━━━━━━━━━━━━━━━━\n` +
+                `No usage recorded yet.`
+        }]
+      };
+    }
+
+    // Calculate input/output from model breakdown
+    let totalInput = 0;
+    let totalOutput = 0;
+    
+    const history = this.tracker.getUserHistory(user_id);
+    history.forEach(record => {
+      totalInput += record.inputTokens || 0;
+      totalOutput += record.outputTokens || 0;
+    });
+
+    const usedTokens = usage.totalTokens;
+    const remaining = Math.max(0, total_budget - usedTokens);
+    const percentUsed = ((usedTokens / total_budget) * 100).toFixed(1);
+    
+    // Progress bar
+    const barLength = 20;
+    const filledLength = Math.round((usedTokens / total_budget) * barLength);
+    const progressBar = '█'.repeat(filledLength) + '░'.repeat(barLength - filledLength);
+    
+    let result = `💰 Current Session\n`;
+    result += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    result += `📊 Used: ${usedTokens.toLocaleString()} tokens (${percentUsed}%)\n`;
+    result += `✨ Remaining: ${remaining.toLocaleString()} tokens\n`;
+    result += `[${progressBar}]\n\n`;
+    result += `📥 Input: ${totalInput.toLocaleString()} tokens\n`;
+    result += `📤 Output: ${totalOutput.toLocaleString()} tokens\n`;
+    result += `💵 Cost: ${formatCost(usage.totalCost)}\n`;
+    result += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    
+    // Model breakdown
+    if (Object.keys(usage.usageByModel).length > 0) {
+      result += `\n📋 Model Breakdown:\n`;
+      Object.entries(usage.usageByModel).forEach(([model, data]) => {
+        result += `  • ${model}: ${data.tokens.toLocaleString()} tokens (${formatCost(data.cost)})\n`;
+      });
+    }
+    
+    return {
+      content: [{ type: 'text', text: result }]
     };
   }
 

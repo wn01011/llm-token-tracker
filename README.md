@@ -9,11 +9,12 @@ Token usage tracker for OpenAI and Claude APIs with **MCP (Model Context Protoco
 
 - 🎯 **Simple Integration** - One line to wrap your API client
 - 📊 **Automatic Tracking** - No manual token counting
-- 💰 **Accurate Pricing** - Up-to-date pricing for all models
+- 💰 **Accurate Pricing** - Up-to-date pricing for all models (2025)
 - 🔄 **Multiple Providers** - OpenAI and Claude support
 - 📈 **User Management** - Track usage per user/session
 - 🌐 **Currency Support** - USD and KRW
 - 🤖 **MCP Server** - Use directly in Claude Desktop!
+- 🆕 **Intuitive Session Tracking** - Real-time usage with progress bars
 
 ## 📦 Installation
 
@@ -91,9 +92,46 @@ Add to Claude Desktop settings (`~/Library/Application Support/Claude/claude_des
 ```
 
 Then in Claude:
+- **"Calculate current session usage"** - See current session usage with intuitive format
+- **"Calculate current conversation cost"** - Get cost breakdown with input/output tokens
 - "Track my API usage"
 - "Compare costs between GPT-4 and Claude"
 - "Show my total spending today"
+
+#### Available MCP Tools
+
+1. **`get_current_session`** - 🆕 Get current session usage (RECOMMENDED)
+   - Returns: Used/Remaining tokens, Input/Output breakdown, Cost, Progress bar
+   - Default user_id: `current-session`
+   - Default budget: 190,000 tokens
+   - **Perfect for real-time conversation tracking!**
+
+2. **`track_usage`** - Track token usage for an AI API call
+   - Parameters: provider, model, input_tokens, output_tokens, user_id
+   
+3. **`get_usage`** - Get usage summary for specific user or all users
+   
+4. **`compare_costs`** - Compare costs between different models
+   
+5. **`clear_usage`** - Clear usage data for a user
+
+#### Example MCP Output
+
+```
+💰 Current Session
+━━━━━━━━━━━━━━━━━━━━━━
+📊 Used: 62,830 tokens (33.1%)
+✨ Remaining: 127,170 tokens
+[██████░░░░░░░░░░░░░░]
+
+📥 Input: 55,000 tokens
+📤 Output: 7,830 tokens
+💵 Cost: $0.2825
+━━━━━━━━━━━━━━━━━━━━━━
+
+📋 Model Breakdown:
+  • anthropic/claude-sonnet-4.5: 62,830 tokens ($0.2825)
+```
 
 ## 📊 Supported Models & Pricing (Updated 2025)
 
@@ -197,7 +235,15 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 🐛 Issues
 
-For bugs and feature requests, please [create an issue](https://github.com/yourusername/llm-token-tracker/issues).
+For bugs and feature requests, please [create an issue](https://github.com/wn01011/llm-token-tracker/issues).
+
+## 📦 What's New in v2.1.0
+
+- 🆕 Added `get_current_session` tool for intuitive session tracking
+- 📊 Real-time progress bars and visual indicators
+- 💰 Enhanced cost breakdown with input/output token separation
+- 🎨 Improved formatting with thousands separators
+- 🔧 Better default user_id handling (`current-session`)
 
 ---
 
