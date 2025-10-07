@@ -1,10 +1,10 @@
 /**
  * LLM Token Tracker - Main Entry Point
- * Track token usage and costs for OpenAI and Claude APIs
+ * Track token usage and costs for OpenAI, Claude, and Gemini APIs
  */
 
 export interface TokenUsage {
-  provider: 'openai' | 'anthropic';
+  provider: 'openai' | 'anthropic' | 'gemini';
   model: string;
   inputTokens?: number;
   outputTokens?: number;
@@ -43,4 +43,5 @@ export interface UserUsage {
 export { TokenTracker } from './tracker.js';
 export { OpenAIWrapper } from './providers/openai.js';
 export { AnthropicWrapper } from './providers/anthropic.js';
+export { GeminiWrapper } from './providers/gemini.js';
 export { calculateCost, formatCost, PRICING } from './pricing.js';

@@ -71,6 +71,25 @@ export const PRICING = {
     'claude-2.1': { input: 0.008, output: 0.024 },
     'claude-2.0': { input: 0.008, output: 0.024 },
     'claude-instant-1.2': { input: 0.0008, output: 0.0024 }
+  },
+  gemini: {
+    // Gemini 2.0 Series (2025)
+    'gemini-2.0-flash-exp': { input: 0, output: 0 }, // Free during preview
+    'gemini-2.0-flash-thinking-exp-1219': { input: 0, output: 0 }, // Free during preview
+    // Gemini 1.5 Series
+    'gemini-1.5-pro': { input: 0.00125, output: 0.005 }, // $1.25/$5 per 1M tokens
+    'gemini-1.5-pro-001': { input: 0.00125, output: 0.005 },
+    'gemini-1.5-pro-002': { input: 0.00125, output: 0.005 },
+    'gemini-1.5-flash': { input: 0.000075, output: 0.0003 }, // $0.075/$0.30 per 1M tokens
+    'gemini-1.5-flash-001': { input: 0.000075, output: 0.0003 },
+    'gemini-1.5-flash-002': { input: 0.000075, output: 0.0003 },
+    'gemini-1.5-flash-8b': { input: 0.0000375, output: 0.00015 }, // $0.0375/$0.15 per 1M tokens
+    // Gemini 1.0 Series (Legacy)
+    'gemini-1.0-pro': { input: 0.0005, output: 0.0015 },
+    'gemini-1.0-pro-001': { input: 0.0005, output: 0.0015 },
+    'gemini-1.0-pro-vision': { input: 0.00025, output: 0.0005 },
+    // Gemini Ultra (Theoretical pricing)
+    'gemini-ultra': { input: 0.002, output: 0.006 }
   }
 } as const;
 
@@ -207,6 +226,54 @@ export function calculateCost(
     return inputCost + outputCost;
   }
 
+  // Handle Gemini models
+  if (provider === 'gemini') {
+    const geminiPricing = PRICING.gemini;
+    const geminiModels = [
+      // Gemini 2.0 series
+      'gemini-2-0-flash-exp', 'gemini-2-0-flash-thinking-exp-1219',
+      // Gemini 1.5 series
+      'gemini-1-5-pro', 'gemini-1-5-pro-001', 'gemini-1-5-pro-002',
+      'gemini-1-5-flash', 'gemini-1-5-flash-001', 'gemini-1-5-flash-002',
+      'gemini-1-5-flash-8b',
+      // Gemini 1.0 series
+      'gemini-1-0-pro', 'gemini-1-0-pro-001', 'gemini-1-0-pro-vision',
+      'gemini-ultra'
+    ] as const;
+    
+    for (const geminiModel of geminiModels) {
+      if (normalizedModel.includes(geminiModel)) {
+        // Map normalized names back to pricing keys
+        let pricingKey: keyof typeof geminiPricing = geminiModel as any;
+        if (geminiModel === 'gemini-2-0-flash-exp') pricingKey = 'gemini-2.0-flash-exp';
+        if (geminiModel === 'gemini-2-0-flash-thinking-exp-1219') pricingKey = 'gemini-2.0-flash-thinking-exp-1219';
+        if (geminiModel === 'gemini-1-5-pro') pricingKey = 'gemini-1.5-pro';
+        if (geminiModel === 'gemini-1-5-pro-001') pricingKey = 'gemini-1.5-pro-001';
+        if (geminiModel === 'gemini-1-5-pro-002') pricingKey = 'gemini-1.5-pro-002';
+        if (geminiModel === 'gemini-1-5-flash') pricingKey = 'gemini-1.5-flash';
+        if (geminiModel === 'gemini-1-5-flash-001') pricingKey = 'gemini-1.5-flash-001';
+        if (geminiModel === 'gemini-1-5-flash-002') pricingKey = 'gemini-1.5-flash-002';
+        if (geminiModel === 'gemini-1-5-flash-8b') pricingKey = 'gemini-1.5-flash-8b';
+        if (geminiModel === 'gemini-1-0-pro') pricingKey = 'gemini-1.0-pro';
+        if (geminiModel === 'gemini-1-0-pro-001') pricingKey = 'gemini-1.0-pro-001';
+        if (geminiModel === 'gemini-1-0-pro-vision') pricingKey = 'gemini-1.0-pro-vision';
+        
+        const modelPricing = geminiPricing[pricingKey];
+        if (modelPricing) {
+          const inputCost = (inputTokens / 1000) * modelPricing.input;
+          const outputCost = (outputTokens / 1000) * modelPricing.output;
+          return inputCost + outputCost;
+        }
+      }
+    }
+    
+    // Default Gemini pricing if model not found (use Gemini 1.5 Flash as baseline)
+    const defaultPricing = geminiPricing['gemini-1.5-flash'];
+    const inputCost = (inputTokens / 1000) * defaultPricing.input;
+    const outputCost = (outputTokens / 1000) * defaultPricing.output;
+    return inputCost + outputCost;
+  }
+
   // Fallback for unknown providers
   console.warn(`Unknown provider: ${provider}, using default pricing`);
   return (inputTokens + outputTokens) * 0.001;
@@ -287,6 +354,24 @@ export function getModelDisplayName(provider: string, model: string): string {
       'claude-3-opus-20240229': 'Claude 3 Opus',
       'claude-3-sonnet-20240229': 'Claude 3 Sonnet',
       'claude-3-haiku-20240307': 'Claude 3 Haiku'
+    },
+    gemini: {
+      // Gemini 2.0 series
+      'gemini-2.0-flash-exp': 'Gemini 2.0 Flash (Experimental)',
+      'gemini-2.0-flash-thinking-exp-1219': 'Gemini 2.0 Flash Thinking',
+      // Gemini 1.5 series
+      'gemini-1.5-pro': 'Gemini 1.5 Pro',
+      'gemini-1.5-pro-001': 'Gemini 1.5 Pro',
+      'gemini-1.5-pro-002': 'Gemini 1.5 Pro',
+      'gemini-1.5-flash': 'Gemini 1.5 Flash',
+      'gemini-1.5-flash-001': 'Gemini 1.5 Flash',
+      'gemini-1.5-flash-002': 'Gemini 1.5 Flash',
+      'gemini-1.5-flash-8b': 'Gemini 1.5 Flash-8B',
+      // Gemini 1.0 series
+      'gemini-1.0-pro': 'Gemini 1.0 Pro',
+      'gemini-1.0-pro-001': 'Gemini 1.0 Pro',
+      'gemini-1.0-pro-vision': 'Gemini 1.0 Pro Vision',
+      'gemini-ultra': 'Gemini Ultra'
     }
   };
   

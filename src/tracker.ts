@@ -5,6 +5,7 @@
 import { TokenUsage, TrackerConfig, UserUsage } from './index.js';
 import { OpenAIWrapper } from './providers/openai.js';
 import { AnthropicWrapper } from './providers/anthropic.js';
+import { GeminiWrapper } from './providers/gemini.js';
 import { calculateCost } from './pricing.js';
 import { FileStorage } from './storage.js';
 import { ExchangeRateManager } from './exchange-rate.js';
@@ -57,6 +58,10 @@ export class TokenTracker {
     
     if (clientName.includes('anthropic') || clientName.includes('claude')) {
       return new AnthropicWrapper(client, this).getWrappedClient() as T;
+    }
+    
+    if (clientName.includes('gemini') || clientName.includes('google')) {
+      return new GeminiWrapper(client, this).getWrappedClient() as T;
     }
     
     throw new Error(`Unsupported client: ${client.constructor.name}`);

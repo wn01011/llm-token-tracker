@@ -1,7 +1,7 @@
 {
   "name": "llm-token-tracker",
-  "version": "2.3.4",
-  "description": "Token usage tracker for OpenAI and Claude APIs with MCP support - Updated 2025 pricing",
+  "version": "2.4.0",
+  "description": "Token usage tracker for OpenAI, Claude, and Gemini APIs with MCP support - Updated 2025 pricing",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -21,6 +21,8 @@
     "openai",
     "claude",
     "anthropic",
+    "gemini",
+    "google-ai",
     "token-tracking",
     "mcp",
     "cost-tracking"
@@ -40,13 +42,17 @@
   },
   "peerDependencies": {
     "openai": "^4.0.0",
-    "@anthropic-ai/sdk": "^0.20.0"
+    "@anthropic-ai/sdk": "^0.20.0",
+    "@google/generative-ai": "^0.1.0"
   },
   "peerDependenciesMeta": {
     "openai": {
       "optional": true
     },
     "@anthropic-ai/sdk": {
+      "optional": true
+    },
+    "@google/generative-ai": {
       "optional": true
     }
   },

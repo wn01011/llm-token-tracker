@@ -1,6 +1,6 @@
 # LLM Token Tracker 🧮
 
-Token usage tracker for OpenAI and Claude APIs with **MCP (Model Context Protocol) support**. Pass accurate API costs to your users.
+Token usage tracker for OpenAI, Claude, and Gemini APIs with **MCP (Model Context Protocol) support**. Pass accurate API costs to your users.
 
 [![npm version](https://badge.fury.io/js/llm-token-tracker.svg)](https://www.npmjs.com/package/llm-token-tracker)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -10,7 +10,7 @@ Token usage tracker for OpenAI and Claude APIs with **MCP (Model Context Protoco
 - 🎯 **Simple Integration** - One line to wrap your API client
 - 📊 **Automatic Tracking** - No manual token counting
 - 💰 **Accurate Pricing** - Up-to-date pricing for all models (2025)
-- 🔄 **Multiple Providers** - OpenAI and Claude support
+- 🔄 **Multiple Providers** - OpenAI, Claude, and Gemini support
 - 📈 **User Management** - Track usage per user/session
 - 🌐 **Currency Support** - USD and KRW
 - 🤖 **MCP Server** - Use directly in Claude Desktop!
@@ -41,7 +41,7 @@ const trackingId = tracker.startTracking('user-123');
 // ... your API call here ...
 
 tracker.endTracking(trackingId, {
-  provider: 'openai',
+  provider: 'openai', // or 'anthropic' or 'gemini'
   model: 'gpt-3.5-turbo',
   inputTokens: 100,
   outputTokens: 50,
@@ -174,6 +174,21 @@ Then in Claude:
 | Claude 3 Sonnet | $0.003 | $0.015 | |
 | Claude 3 Haiku | $0.00025 | $0.00125 | Most affordable |
 
+### Google Gemini (2025)
+| Model | Input (per 1K tokens) | Output (per 1K tokens) | Notes |
+|-------|----------------------|------------------------|-------|
+| **Gemini 2.0 Series** | | | |
+| Gemini 2.0 Flash (Exp) | Free | Free | Experimental preview |
+| Gemini 2.0 Flash Thinking | Free | Free | Reasoning preview |
+| **Gemini 1.5 Series** | | | |
+| Gemini 1.5 Pro | $0.00125 | $0.005 | Most capable |
+| Gemini 1.5 Flash | $0.000075 | $0.0003 | Fast & efficient |
+| Gemini 1.5 Flash-8B | $0.0000375 | $0.00015 | Ultra-fast |
+| **Gemini 1.0 Series** | | | |
+| Gemini 1.0 Pro | $0.0005 | $0.0015 | Legacy model |
+| Gemini 1.0 Pro Vision | $0.00025 | $0.0005 | Multimodal |
+| Gemini Ultra | $0.002 | $0.006 | Premium tier |
+
 **Note:** Prices shown are per 1,000 tokens. Batch API offers 50% discount. Prompt caching can reduce costs by up to 90%.
 
 ## 🎯 Examples
@@ -236,6 +251,14 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 🐛 Issues
 
 For bugs and feature requests, please [create an issue](https://github.com/wn01011/llm-token-tracker/issues).
+
+## 📦 What's New in v2.4.0
+
+- 🎉 **Gemini API Support** - Full integration with Google's Gemini models
+- 💎 **Gemini 2.0 Support** - Free preview models included
+- 📊 **Enhanced Pricing** - Up-to-date Gemini 1.5 and 2.0 pricing
+- 🔧 **Auto-detection** - Automatic Gemini client wrapping
+- 💰 **Cost Comparison** - Compare Gemini with OpenAI and Claude
 
 ## 📦 What's New in v2.3.0
 

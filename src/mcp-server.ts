@@ -55,7 +55,7 @@ class TokenTrackerMCPServer {
             properties: {
               provider: {
                 type: 'string',
-                enum: ['openai', 'anthropic'],
+                enum: ['openai', 'anthropic', 'gemini'],
                 description: 'AI provider'
               },
               model: {
@@ -180,7 +180,7 @@ class TokenTrackerMCPServer {
     
     const trackingId = this.tracker.startTracking(user_id);
     this.tracker.endTracking(trackingId, {
-      provider: provider as 'openai' | 'anthropic',
+      provider: provider as 'openai' | 'anthropic' | 'gemini',
       model,
       inputTokens: input_tokens,
       outputTokens: output_tokens,
@@ -308,7 +308,9 @@ class TokenTrackerMCPServer {
       { provider: 'openai' as const, model: 'gpt-4', name: 'GPT-4' },
       { provider: 'anthropic' as const, model: 'claude-3-haiku-20240307', name: 'Claude Haiku' },
       { provider: 'anthropic' as const, model: 'claude-3-sonnet-20240229', name: 'Claude Sonnet' },
-      { provider: 'anthropic' as const, model: 'claude-3-opus-20240229', name: 'Claude Opus' }
+      { provider: 'anthropic' as const, model: 'claude-3-opus-20240229', name: 'Claude Opus' },
+      { provider: 'gemini' as const, model: 'gemini-1.5-flash', name: 'Gemini Flash' },
+      { provider: 'gemini' as const, model: 'gemini-1.5-pro', name: 'Gemini Pro' }
     ];
     
     const comparison = models.map(({ provider, model, name }) => {
